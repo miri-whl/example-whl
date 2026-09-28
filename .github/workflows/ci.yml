@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Only reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The library supports 3.9 upward. The oldest and the newest are
+        # the two that actually find things; the middle versions rarely
+        # differ and cost minutes on every push.
+        python: ["3.9", "3.13"]
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]" || python -m pip install pytest "tomli; python_version < '3.11'"
+
+      # The fast suite. It passes for both layouts by construction — that
+      # is the point the repository exists to make — so a green run here
+      # proves the statistics are right and nothing about the packaging.
+      - name: Unit tests
+        run: python -m pytest -m "not installed"
+
+      # This is the one that matters. It builds both wheels, installs
+      # each into a throwaway virtualenv, and asserts that the good one
+      # reaches its data file and the bad one does not.
+      #
+      # If this ever fails because the BAD wheel started working, the
+      # repository has stopped demonstrating anything and the README is
+      # a lie. That is worth a red build, not a shrug: the failure is
+      # the specimen, and a specimen that heals is no longer evidence.
+      - name: Install round-trip — the contrast must still hold
+        run: python -m pytest -m installed
+
+      - name: Both wheels build and differ only in placement
+        run: |
+          python build.py
+          echo "--- good ---"
+          python -m zipfile -l dist/good/*.whl | grep -E "t-table|tables.py"
+          echo "--- bad ----"
+          python -m zipfile -l dist/bad/*.whl | grep -E "t-table|tables.py"
