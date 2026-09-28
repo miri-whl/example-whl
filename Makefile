@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup build good bad test test-all demo clean
+.PHONY: help setup build good bad probe test test-all demo clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -30,6 +30,9 @@ good: $(VENV)  ## Build the working wheel and watch it work
 
 bad: $(VENV)  ## Build the broken wheel and watch it fail
 	@./demo.sh bad
+
+probe: $(VENV)  ## Where do all five .data scheme keys actually install?
+	@$(PY) probe_schemes.py
 
 # The fast suite. It imports tinystat from src/ and passes for BOTH
 # layouts, which is the point being made — see tests/test_installed.py.

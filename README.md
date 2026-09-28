@@ -29,6 +29,7 @@ Or take them one at a time:
 | `make build` | write both wheels into `dist/` and stop |
 | `make test` | the unit tests — fast, and pass for either wheel |
 | `make test-all` | adds the install round-trip, which tells them apart |
+| `make probe` | all five `.data` scheme keys: where each lands, what is reachable |
 
 `build.py` takes the same argument if you would rather not use make:
 `python build.py bad` writes only that one, and leaves the other where it
@@ -146,6 +147,8 @@ tests/
   test_stats.py        unit tests — pass for either wheel
   test_installed.py    builds, installs, and probes — tells them apart
 build.py               writes both wheels from the tree above
+probe_schemes.py       where all five .data scheme keys install, and
+                       which of them the installed package can reach
 demo.sh                installs both and shows the difference
 Makefile               setup, build, test, test-all, demo, clean
 pyproject.toml         metadata; build.py reads name and version from it
