@@ -1,0 +1,26 @@
+{
+  "$schema": "https://miri-whl.github.io/schemas/lifecycle-v1.json",
+  "miri_lifecycle_version": "0.1",
+  "generated_at": "BUILD_STAMP",
+  "identity": {
+    "purl": "pkg:pypi/tinystat@1.0.0",
+    "distribution": "open-source",
+    "registry": "https://pypi.org/simple/",
+    "source_repository": "https://github.com/miri-whl/example-whl"
+  },
+  "advisory_sources": [
+    {
+      "type": "osv",
+      "ecosystem": "PyPI",
+      "url": "https://api.osv.dev/v1/query",
+      "authoritative": true
+    }
+  ],
+  "update_check": {
+    "type": "pypi-json",
+    "url": "https://pypi.org/pypi/tinystat/json"
+  },
+  "support": {
+    "status": "active"
+  }
+}

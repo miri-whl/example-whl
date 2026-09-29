@@ -29,6 +29,7 @@ Usage:
 from __future__ import annotations
 
 import base64
+import datetime
 import hashlib
 import shutil
 import sys
@@ -65,8 +66,16 @@ DIST_INFO = f"{NAME}-{VERSION}.dist-info"
 DATA_DIR = f"{NAME}-{VERSION}.data"
 
 #: The directories that are not Python source. Where these land is the
-#: entire difference between the two wheels.
-CARRIED = ("data", "docs", "examples")
+#: entire difference between the two wheels. `agent-metadata` is in the
+#: list for the same reason as the rest: a consumer reads it through the
+#: import package or not at all, so routing it through `.data` orphans it
+#: exactly like the lookup table.
+CARRIED = ("data", "docs", "examples", "agent-metadata")
+
+#: Stamped into lifecycle.json at build time. The standard wants
+#: `generated_at` inside the build window, and a timestamp committed to
+#: the source tree goes stale the day after it is written.
+BUILD_STAMP = "BUILD_STAMP"
 
 METADATA = f"""Metadata-Version: 2.1
 Name: {NAME}
@@ -85,6 +94,16 @@ Generator: example-whl build.py
 Root-Is-Purelib: true
 Tag: py3-none-any
 """
+
+
+def _stamp() -> str:
+    """The build timestamp, RFC 3339 in UTC.
+
+    Returns:
+        Now, to the second, with an explicit +00:00 offset.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+    return now.isoformat()
 
 
 def _record_row(path: str, payload: bytes) -> str:
@@ -123,7 +142,10 @@ def _members(good: bool) -> dict[str, bytes]:
             archive_path = f"{DATA_DIR}/data/{relative.as_posix()}"
         else:
             archive_path = f"{NAME}/{relative.as_posix()}"
-        members[archive_path] = source.read_bytes()
+        payload = source.read_bytes()
+        if BUILD_STAMP.encode() in payload:
+            payload = payload.replace(BUILD_STAMP.encode(), _stamp().encode())
+        members[archive_path] = payload
     members[f"{DIST_INFO}/METADATA"] = METADATA.encode()
     members[f"{DIST_INFO}/WHEEL"] = WHEEL.encode()
     members[f"{DIST_INFO}/top_level.txt"] = f"{NAME}\n".encode()

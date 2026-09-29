@@ -141,7 +141,8 @@ src/tinystat/
   core.py              the functions that touch no files
   tables.py            t_critical — reads data/t-table.json via importlib.resources
   data/t-table.json    Student's t critical values
-  docs/api.md          the API reference
+  docs/api_reference.md the API reference
+  docs/troubleshooting.md  failure modes and fixes
   examples/quickstart.py
 tests/
   test_stats.py        unit tests — pass for either wheel
