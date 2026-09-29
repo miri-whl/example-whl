@@ -28,13 +28,21 @@ sample = [10.2, 10.4, 10.1, 10.3]
 print(f"  import       OK, version {tinystat.__version__}")
 print(f"  mean         {tinystat.mean(sample):.4f}")
 print(f"  stdev        {tinystat.stdev(sample):.4f}")
+# Each call is probed on its own. One try around both would stop at the
+# first failure and hide the interesting half: confidence_interval opens
+# no file in its life and goes down anyway, because it asks t_critical
+# for a number.
 try:
     print(f"  t_critical   {tinystat.t_critical(10, 0.05)}")
-    low, high = tinystat.confidence_interval(sample)
-    print(f"  95% CI       {low:.4f} to {high:.4f}")
 except FileNotFoundError as error:
     print("  t_critical   FileNotFoundError")
     print(f"               looked in {error.filename.replace(root, '<venv>')}")
+try:
+    low, high = tinystat.confidence_interval(sample)
+    print(f"  95% CI       {low:.4f} to {high:.4f}")
+except FileNotFoundError:
+    print("  95% CI       FileNotFoundError")
+    print("               opens no file itself; it calls t_critical")
 PY
   echo "  the table actually installed to:"
   find "$venv" -name t-table.json 2>/dev/null | sed "s|$venv|               <venv>|"
