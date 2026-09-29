@@ -21,6 +21,7 @@
     "url": "https://pypi.org/pypi/tinystat/json"
   },
   "support": {
-    "status": "active"
+    "status": "active",
+    "security_policy": "https://github.com/miri-whl/example-whl/security/policy"
   }
 }
